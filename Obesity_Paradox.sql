@@ -96,7 +96,57 @@ FROM(SELECT v.person_id, gender_concept_id, year_of_birth, measurement_date, wei
 ************************************************/
 
 --duration < 3 year인 경우 제외 (187,993)
-
 SELECT * into [NHIS_NSC].[dbo].[YJPARK_project_2]
 FROM [NHIS_NSC].[dbo].[YJPARK_project]
 WHERE duration >= 3
+
+/*****************************************************
+2.2.1 Characteristics 확인
+***********************************************/
+--AGE index 10 years
+
+SELECT gender_concept_id, COUNT(*), AVG(age) as age, AVG(BMI) as BMI ,
+	   CASE WHEN AGE BETWEEN 0 AND 9 THEN '0-9 years'
+	        WHEN AGE BETWEEN 10 AND 19 THEN '10-19 years'
+			WHEN AGE BETWEEN 20 AND 29 THEN '20-29 years'
+			WHEN AGE BETWEEN 30 AND 39 THEN '30-39 years'
+			WHEN AGE BETWEEN 40 AND 49 THEN '40-49 years'
+			WHEN AGE BETWEEN 50 AND 59 THEN '50-59 years'
+			WHEN AGE BETWEEN 60 AND 69 THEN '60-69 years'
+			WHEN AGE BETWEEN 70 AND 79 THEN '70-79 years'
+			WHEN AGE BETWEEN 80 AND 89 THEN '80-89 years'
+			WHEN AGE BETWEEN 90 AND 99 THEN '90-99 years'
+			WHEN AGE BETWEEN 100 AND 109 THEN '100-109 years' END AS AGE_SECTION
+FROM [NHIS_NSC].[dbo].[YJPARK_project_2]
+GROUP BY gender_concept_id, 
+		CASE WHEN AGE BETWEEN 0 AND 9 THEN '0-9 years'
+	        WHEN AGE BETWEEN 10 AND 19 THEN '10-19 years'
+			WHEN AGE BETWEEN 20 AND 29 THEN '20-29 years'
+			WHEN AGE BETWEEN 30 AND 39 THEN '30-39 years'
+			WHEN AGE BETWEEN 40 AND 49 THEN '40-49 years'
+			WHEN AGE BETWEEN 50 AND 59 THEN '50-59 years'
+			WHEN AGE BETWEEN 60 AND 69 THEN '60-69 years'
+			WHEN AGE BETWEEN 70 AND 79 THEN '70-79 years'
+			WHEN AGE BETWEEN 80 AND 89 THEN '80-89 years'
+			WHEN AGE BETWEEN 90 AND 99 THEN '90-99 years'
+			WHEN AGE BETWEEN 100 AND 109 THEN '100-109 years' END
+ORDER BY gender_concept_id, AVG(age) 
+
+--BMI partition through 대한비만학회(2018)
+
+SELECT gender_concept_id, COUNT(*), AVG(BMI) AS BMI,
+		CASE WHEN BMI <18.5 THEN 'under'
+			 WHEN BMI >=18.5 AND BMI <23 THEN 'normal'
+			 WHEN BMI >= 23 AND BMI <25 THEN 'pre-obesity'
+			 WHEN BMI >= 25 AND BMI <30 THEN '1 stage obesity'
+			 WHEN BMI >= 30 AND BMI <35 THEN '2 stage obesity'
+			 WHEN BMI >= 35 THEN '3 stage obesity' END AS BMI_SECTION
+FROM [NHIS_NSC].[dbo].[YJPARK_project_2]
+GROUP BY gender_concept_id, 
+		CASE WHEN BMI <18.5 THEN 'under'
+			 WHEN BMI >=18.5 AND BMI <23 THEN 'normal'
+			 WHEN BMI >= 23 AND BMI <25 THEN 'pre-obesity'
+			 WHEN BMI >= 25 AND BMI <30 THEN '1 stage obesity'
+			 WHEN BMI >= 30 AND BMI <35 THEN '2 stage obesity'
+			 WHEN BMI >= 35 THEN '3 stage obesity' END
+ORDER BY gender_concept_id, AVG(BMI) 
