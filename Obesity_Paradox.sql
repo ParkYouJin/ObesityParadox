@@ -105,7 +105,7 @@ WHERE duration >= 3
 ***********************************************/
 --AGE index 10 years
 
-SELECT gender_concept_id, COUNT(*), AVG(age) as age, AVG(BMI) as BMI ,
+SELECT gender_concept_id, COUNT(*) AS N, AVG(age) as age, AVG(BMI) as BMI ,
 	   CASE WHEN AGE BETWEEN 0 AND 9 THEN '0-9 years'
 	        WHEN AGE BETWEEN 10 AND 19 THEN '10-19 years'
 			WHEN AGE BETWEEN 20 AND 29 THEN '20-29 years'
@@ -134,7 +134,7 @@ ORDER BY gender_concept_id, AVG(age)
 
 --BMI partition through 대한비만학회(2018)
 
-SELECT gender_concept_id, COUNT(*), AVG(BMI) AS BMI,
+SELECT gender_concept_id, COUNT(*) AS N, AVG(BMI) AS BMI,
 		CASE WHEN BMI <18.5 THEN 'under'
 			 WHEN BMI >=18.5 AND BMI <23 THEN 'normal'
 			 WHEN BMI >= 23 AND BMI <25 THEN 'pre-obesity'
@@ -150,3 +150,28 @@ GROUP BY gender_concept_id,
 			 WHEN BMI >= 30 AND BMI <35 THEN '2 stage obesity'
 			 WHEN BMI >= 35 THEN '3 stage obesity' END
 ORDER BY gender_concept_id, AVG(BMI) 
+
+/*********************************************
+2.2.2 BMI 를 Categorical하게 바꿈
+***************************************/
+
+--DROP TABLE [NHIS_NSC].[dbo].[YJPARK_project_2]
+SELECT * , 
+      CASE WHEN BMI <18.5 THEN 'under'
+			 WHEN BMI >=18.5 AND BMI <23 THEN 'normal'
+			 WHEN BMI >= 23 AND BMI <25 THEN 'pre-obesity'
+			 WHEN BMI >= 25 AND BMI <30 THEN '1 stage obesity'
+			 WHEN BMI >= 30 AND BMI <35 THEN '2 stage obesity'
+			 WHEN BMI >= 35 THEN '3 stage obesity' END AS BMI_SECTION into [NHIS_NSC].[dbo].[YJPARK_project_2]
+FROM [NHIS_NSC].[dbo].[YJPARK_project]
+WHERE duration >= 3
+
+--compare(잘 insert 됐는지)
+
+SELECT BMI_section, COUNT(*) AS N 
+FROM [NHIS_NSC].[dbo].[YJPARK_project_2] 
+GROUP BY BMI_section
+
+--SELECT * FROM [NHIS_NSC].[dbo].[YJPARK_project_2]  WHERE BMI_SECTION is NULL
+
+
